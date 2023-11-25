@@ -1,49 +1,43 @@
-import {combineReducers, createStore} from 'redux'
+import React, {useCallback, useState} from 'react'
 import ReactDOM from 'react-dom'
-import {Provider, useSelector} from 'react-redux'
-import React from 'react'
 
-let initialState = {items:
-        [
-            {id: 1, name: 'Dimych'},
-            {id: 2, name: 'Ignat'}
-        ]
-}
-const usersReducer = (state = initialState, action: any) => {
-    return state
-}
+export const App = () => {
+    const [temp, setTemp] = useState(10)
+    const [seconds, setSeconds] = useState(100)
 
-let authInitialState = {login: 'Margo', settings: {theme: 'dark'}}
-const authReducer = (state = authInitialState, action: any) => {
-    return state
-}
+    const increaseSeconds = () => setSeconds(seconds + 10)
+    const increaseTemp = useCallback(() => setTemp(temp + 1),[temp])
 
-let rootReducer = combineReducers({
-    users: usersReducer,
-    auth: authReducer
+    return <>
+        <TempDisplay temp={temp} increaseTemp={increaseTemp}/>
+
+        <div>
+            <b>Секунды :</b> {seconds} с
+            <button style={{marginLeft: '15px'}}
+                    onClick={increaseSeconds}>
+                Увеличить на 10 секунд
+            </button>
+        </div>
+    </>
+}
+const TempDisplay = React.memo((props: any) => {
+    console.log('Render TempDisplay')
+    return (
+        <div style={{marginBottom: '15px'}}
+             onClick={props.reset}>
+            <b>Температура:</b> {props.temp} &#176;
+            <button style={{marginLeft: '15px'}}
+                    onClick={props.increaseTemp}>
+                Увеличить температуру на 1 градус
+            </button>
+        </div>
+    )
 })
 
-const store = createStore(rootReducer)
-type RootStateType = ReturnType<typeof rootReducer>
+ReactDOM.render(<App/>, document.getElementById('root'));
 
-const selector = (state: RootStateType) => state.users.items
+// Что надо написать вместо XXX для того, чтобы обязательно выполнялись 2 условия:
+// 1) При нажатии на кнопку "Увеличить температуру на 1 градус" температура увеличивалась
+// 2) Компонент TempDisplay не должен перерисовываться при нажатии на кнопку "Увеличить на 10 секунд"
 
-const Users = () => {
-
-    const users = useSelector(selector)
-
-    return <ul>
-        {users.map(u => <li key={u.id}>{u.name}</li>)}
-    </ul>
-}
-
-ReactDOM.render(<div>
-        <Provider store={store}>
-            <Users/>
-        </Provider>
-    </div>,
-    document.getElementById('root')
-)
-
-// Что нужно написать вместо XXX, чтобы отрендерить список юзеров?
-// ❗ Ответ дать минимально возможным объёмом кода
+// Пример ответа: useEffect(() => setCounter(count + 1), [count])
